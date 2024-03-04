@@ -1,0 +1,18 @@
+{
+  "name": "vision",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "@google-cloud/vision": "^4.1.0",
+    "dotenv": "^16.4.5",
+    "selenium-webdriver": "^4.18.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
