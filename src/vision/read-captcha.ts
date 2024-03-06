@@ -2,7 +2,7 @@ const vision = require("@google-cloud/vision");
 
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
-  projectId: "personal-stuff-415907",
+  projectId: process.env.GCP_PROJECT_ID,
 });
 
 export const readCaptcha = async (fileName) => {

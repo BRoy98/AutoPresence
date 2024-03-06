@@ -1,39 +1,20 @@
-import chrome from "selenium-webdriver/chrome";
-import { Builder, By, Key, until } from "selenium-webdriver";
-import { dataURLtoFile } from "./data-to-file";
-import { readCaptcha } from "./read-captcha";
-
 require("dotenv").config();
+import cron from "node-cron";
+import { doShit } from "./selenium";
+import "./server";
+import { createUser, getUserByEmail } from "./db";
 
-const screen = {
-  width: 640,
-  height: 480,
-};
+const run = async () => {};
 
-let driver = new Builder()
-  .forBrowser("chrome")
-  .setChromeOptions(new chrome.Options().windowSize(screen))
-  .build();
+run();
 
-const open = async () => {
-  await driver.get("https://app.keka.com/Account/KekaLogin");
+// const run = () => {
+//   cron.schedule("55 9 * * *", () => {
+//     const driver = doShit(true);
+//   });
+//   cron.schedule("10 19 * * *", () => {
+//     const driver = doShit(true);
+//   });
+// };
 
-  const emailInput = driver.findElement(By.xpath("//input[@id='email']"));
-  const passwordInput = driver.findElement(By.xpath("//input[@id='password']"));
-  const captchaImg = driver.findElement(By.xpath("//img[@id='imgCaptcha']"));
-  const captchaInput = driver.findElement(By.xpath("//input[@id='captcha']"));
-  const loginButton = driver.findElement(By.xpath('//button[text()="Login"]'));
-
-  emailInput.sendKeys(process.env.EMAIL);
-  passwordInput.sendKeys(process.env.PASSWORD);
-
-  const captchaBase64 = await captchaImg.getAttribute("src");
-
-  dataURLtoFile(captchaBase64, "captcha.png");
-  const captchaText = await readCaptcha("captcha.png");
-  await captchaInput.sendKeys(captchaText);
-
-  // loginButton.click();
-};
-
-open();
+// run();
