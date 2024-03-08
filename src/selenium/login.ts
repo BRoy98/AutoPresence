@@ -4,22 +4,21 @@ import {
   extractOtpFromMail,
   getLatestMailFromLabel,
 } from "../gmail/get-mail-body";
-import { By, ThenableWebDriver, until } from "selenium-webdriver";
+import { By, WebDriver, until } from "selenium-webdriver";
 import { dataURLtoFile } from "../utils/data-to-file";
 import { readCaptcha } from "../vision/read-captcha";
+import { asyncDelay } from "../utils/delay";
 
-const readOTP = async () => {
+export const readOTP = async () => {
   const kekaLabel = await getKekaLabel();
   const latestMail = await getLatestMailFromLabel([kekaLabel.id]);
 
   if (DateTime.now().diff(latestMail.receivedAt).milliseconds > 60000) {
+    console.log("====================================");
+    console.log("No mail found in last 1 minute. Retrying in 10 seconds...");
+    console.log("====================================");
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log("====================================");
-        console.log(
-          "No mail found in last 1 minute. Retrying in 10 seconds..."
-        );
-        console.log("====================================");
         resolve(readOTP());
       }, 10000);
     });
@@ -29,7 +28,7 @@ const readOTP = async () => {
   return otp;
 };
 
-export const loginToKeka = async (driver: ThenableWebDriver) => {
+export const loginToKeka = async (driver: WebDriver) => {
   // ------------------------------------------------------------
   // AUTHENTICATION
   // ------------------------------------------------------------
@@ -39,11 +38,10 @@ export const loginToKeka = async (driver: ThenableWebDriver) => {
   const captchaInput = driver.findElement(By.xpath("//input[@id='captcha']"));
   const loginButton = driver.findElement(By.xpath('//button[text()="Login"]'));
 
-  emailInput.sendKeys(process.env.EMAIL);
-  passwordInput.sendKeys(process.env.PASSWORD);
+  emailInput.sendKeys(process.env.KEKA_EMAIL);
+  passwordInput.sendKeys(process.env.KEKA_PASSWORD);
 
   const captchaBase64 = await captchaImg.getAttribute("src");
-
   dataURLtoFile(captchaBase64, "captcha.png");
   const captchaText = await readCaptcha("captcha.png");
 
@@ -52,8 +50,20 @@ export const loginToKeka = async (driver: ThenableWebDriver) => {
   console.log("====================================");
 
   await captchaInput.sendKeys(captchaText);
-
   await loginButton.click();
+
+  let captchaFailed;
+  try {
+    await asyncDelay(2000);
+    const invalidCaptchaText =
+      '//*[contains(text(), "Invalid Captcha. Please try again.")]';
+    await driver.wait(until.elementLocated(By.xpath(invalidCaptchaText)), 5000);
+    captchaFailed = await driver.findElement(By.xpath(invalidCaptchaText));
+  } catch (error) {}
+
+  if (captchaFailed) {
+    throw new Error("captcha-failed");
+  }
 
   // wait for page to load and OTP buttons to get visible
   await driver.wait(
@@ -72,10 +82,10 @@ export const loginToKeka = async (driver: ThenableWebDriver) => {
 
   await emailOTPButton.click();
 
-  await fillCaptcha(driver);
+  await fillOTP(driver);
 };
 
-const fillCaptcha = async (driver: ThenableWebDriver) => {
+const fillOTP = async (driver: WebDriver) => {
   // wait for page to load and OTP input to get visible
   await driver.wait(
     until.elementLocated(By.xpath(`//input[@id='code']`)),

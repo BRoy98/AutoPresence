@@ -1,17 +1,12 @@
 import express from "express";
 import axios from "axios";
-import session from "cookie-session";
-import { createUser, getUserByEmail } from "../db";
+import { createUser, getUserByEmail, updateUserTokens } from "../db";
+import { generateGmailAuthUrl, getOAuthClient } from "../gmail/oauth";
 const router = express.Router();
 
-const CLIENT_ID = process.env.GCP_CLINT_ID;
-const CLIENT_SECRET = process.env.GCP_CLINT_SECRET;
-const REDIRECT_URI = `${process.env.REDIRECT_DOMAIN}/auth/google/callback`;
-
-// Initiates the Google Login flow
-router.get("/google", (req, res) => {
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`;
-  return res.redirect(url);
+router.get("/google", async (req, res) => {
+  const { oauth2Client } = await getOAuthClient();
+  return res.redirect(generateGmailAuthUrl(oauth2Client));
 });
 
 // Callback URL for handling the Google Login response
@@ -19,36 +14,40 @@ router.get("/google/callback", async (req, res) => {
   const { code } = req.query;
 
   try {
-    // Exchange authorization code for access token
-    const { data } = await axios.post("https://oauth2.googleapis.com/token", {
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      code,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code",
-    });
+    const { oauth2Client, setCredentials } = await getOAuthClient();
 
-    const { access_token, id_token } = data;
+    const { tokens } = await oauth2Client.getToken(code);
+    setCredentials(tokens);
 
     // Use access_token or id_token to fetch user profile
     const { data: profile } = await axios.get(
       "https://www.googleapis.com/oauth2/v1/userinfo",
       {
-        headers: { Authorization: `Bearer ${access_token}` },
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
       }
     );
 
-    // Code to handle user authentication and retrieval using the profile data
     console.log("====================================");
     console.log("profile", profile);
+    console.log("tokens", tokens);
     console.log("====================================");
 
-    let user = await getUserByEmail(profile.user);
+    let user = getUserByEmail(profile.email);
+    console.log("====================================");
+    console.log("Auth USER on DB", user);
+    console.log("====================================");
     if (!user) {
-      await createUser({
+      createUser({
         ...profile,
+        ...tokens,
         google_id: profile.id,
       });
+    } else {
+      updateUserTokens(
+        profile.email,
+        tokens.access_token,
+        tokens.refresh_token
+      );
     }
     return res.redirect("/");
   } catch (error) {

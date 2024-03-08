@@ -1,19 +1,9 @@
 import express from "express";
-import cookieSession from "cookie-session";
 import { router as authRoutes } from "./auth";
 const app = express();
 
 app.set("view engine", "ejs");
-
-app.use(
-  cookieSession({
-    name: "session",
-    keys: [process.env.COOKIE_KEY],
-
-    // Cookie Options
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  })
-);
+app.set("trust proxy", 1);
 
 app.use("/auth", authRoutes);
 

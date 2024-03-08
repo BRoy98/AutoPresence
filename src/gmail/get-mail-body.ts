@@ -1,17 +1,10 @@
-import fs from "fs";
-import path from "path";
-import { promisify } from "util";
 import { google, gmail_v1 } from "googleapis";
-import { OAuth2Client } from "google-auth-library";
 import { DateTime } from "luxon";
+import { getOAuthClient } from "./oauth";
+import { getUserByEmail } from "../db";
+import { convert } from "html-to-text";
 
 const gmail = google.gmail("v1");
-
-// Promisify with promise
-const readFileAsync = promisify(fs.readFile);
-
-// Gmail label list
-const TOKEN_PATH = "../gmail-nodejs-quickstart.json"; // Specify the access token file
 
 export const getLatestMailFromLabel = async (
   labelIds: Array<string>
@@ -19,20 +12,12 @@ export const getLatestMailFromLabel = async (
   body: string;
   receivedAt: DateTime;
 }> => {
-  // Get credential information
-  const content = await readFileAsync(
-    path.join(__dirname, "../credentials.json")
-  );
-  // specify the client secret file
-  const credentials = JSON.parse(content.toString()); // credential
-
-  // authentication
-  const clientSecret = credentials.web.client_secret;
-  const clientId = credentials.web.client_id;
-  const redirectUrl = credentials.web.redirect_uris[0];
-  const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUrl);
-  const token = await readFileAsync(path.join(__dirname, TOKEN_PATH));
-  oauth2Client.credentials = JSON.parse(token.toString());
+  console.log("====================================");
+  console.log("labelIds", labelIds);
+  console.log("====================================");
+  const { oauth2Client } = await getOAuthClient();
+  let user = getUserByEmail(process.env.GCP_AUTH_EMAIL);
+  oauth2Client.setCredentials(user);
 
   try {
     const latestMessageId: string = await new Promise((resolve, reject) => {
@@ -44,6 +29,10 @@ export const getLatestMailFromLabel = async (
           labelIds: labelIds,
         },
         function (err, res) {
+          console.log("====================================");
+          console.log(1, err);
+          console.log(2, res);
+          console.log("====================================");
           if (err) {
             reject(err);
           } else {
@@ -53,6 +42,10 @@ export const getLatestMailFromLabel = async (
         }
       );
     });
+
+    if (!latestMessageId) {
+      if (!latestMessageId) throw new Error("No mail found under label 'keka'");
+    }
 
     const latestMessageContent: gmail_v1.Schema$MessagePart = await new Promise(
       (resolve, reject) => {
@@ -78,10 +71,7 @@ export const getLatestMailFromLabel = async (
       (header) => header.name === "Date"
     );
     const messageInboxTime = new Date(messageInboxTimeHeader?.value);
-
-    let bodyContent = JSON.stringify(
-      latestMessageContent?.parts?.[0].body.data
-    );
+    let bodyContent = JSON.stringify(latestMessageContent?.body.data);
 
     let data, buff;
     data = bodyContent;
@@ -89,7 +79,7 @@ export const getLatestMailFromLabel = async (
     const mailBody = buff.toString();
 
     return {
-      body: mailBody,
+      body: convert(mailBody),
       receivedAt: DateTime.fromJSDate(messageInboxTime),
     };
   } catch (err) {
