@@ -8,6 +8,7 @@ import { initUserTable } from "./db";
 import "./server";
 import { sendNotification } from "./slack";
 import { DateTime } from "luxon";
+import { millisToMinutesAndSeconds } from "./utils/ms-to-min";
 
 initUserTable();
 
@@ -63,25 +64,31 @@ const clockOut = async (delayMs) => {
 
 const run = async () => {
   cron.schedule("50 9 * * 1-5", () => {
+    const delayMs = Math.floor(Math.random() * 1200000);
     const message = `🕘 Clock-in started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
-    sendNotification(message);
+    sendNotification(
+      message,
+      `Delay: ${millisToMinutesAndSeconds(delayMs)} min`
+    );
     console.log("====================================");
     console.log(message);
     console.log("====================================");
-    const delayMs = Math.floor(Math.random() * 1200000);
     clockIn(delayMs);
   });
   cron.schedule("10 19 * * 1-5", () => {
+    const delayMs = Math.floor(Math.random() * 1200000);
     const message = `🕕 Clock-out started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
-    sendNotification(message);
+    sendNotification(
+      message,
+      `Delay: ${millisToMinutesAndSeconds(delayMs)} min`
+    );
     console.log("====================================");
     console.log(message);
     console.log("====================================");
-    const delayMs = Math.floor(Math.random() * 1200000);
     clockOut(delayMs);
   });
 };
