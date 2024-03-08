@@ -3,7 +3,7 @@ import path from "path";
 import { User } from "./types";
 
 const db = new sqlite3(
-  path.join(__dirname, "../..", "/static/gmail-notifier.sqlite")
+  path.join(__dirname, "../..", "/static/gmail-notifier.prod.sqlite")
 );
 
 export const initUserTable = () => {
