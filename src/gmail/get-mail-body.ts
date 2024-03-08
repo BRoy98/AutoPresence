@@ -12,9 +12,6 @@ export const getLatestMailFromLabel = async (
   body: string;
   receivedAt: DateTime;
 }> => {
-  console.log("====================================");
-  console.log("labelIds", labelIds);
-  console.log("====================================");
   const { oauth2Client } = await getOAuthClient();
   let user = getUserByEmail(process.env.GCP_AUTH_EMAIL);
   oauth2Client.setCredentials(user);
@@ -29,10 +26,6 @@ export const getLatestMailFromLabel = async (
           labelIds: labelIds,
         },
         function (err, res) {
-          console.log("====================================");
-          console.log(1, err);
-          console.log(2, res);
-          console.log("====================================");
           if (err) {
             reject(err);
           } else {

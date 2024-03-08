@@ -9,7 +9,7 @@ export const getLabels = async (): Promise<Array<Label>> => {
   const { oauth2Client } = await getOAuthClient();
   let user = getUserByEmail(process.env.GCP_AUTH_EMAIL);
 
-  if(!user) throw Error("User data ont found in DB")
+  if(!user) throw Error("User data not found in DB")
 
   oauth2Client.setCredentials(user);
 
@@ -42,7 +42,7 @@ export const getKekaLabel = async () => {
   const kekaLabel = labels.find((label) => label.name === "keka");
 
   if (!kekaLabel) {
-    throw new Error("no lable found with the name 'keka'");
+    throw new Error("no label found with the name 'keka'");
   }
 
   return kekaLabel;

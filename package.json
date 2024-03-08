@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^4.1.0",
+    "@slack/webhook": "^7.0.2",
     "axios": "^1.6.7",
     "better-sqlite3": "^9.4.3",
     "cookie-session": "^2.1.0",

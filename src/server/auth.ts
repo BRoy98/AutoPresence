@@ -27,15 +27,7 @@ router.get("/google/callback", async (req, res) => {
       }
     );
 
-    console.log("====================================");
-    console.log("profile", profile);
-    console.log("tokens", tokens);
-    console.log("====================================");
-
     let user = getUserByEmail(profile.email);
-    console.log("====================================");
-    console.log("Auth USER on DB", user);
-    console.log("====================================");
     if (!user) {
       createUser({
         ...profile,

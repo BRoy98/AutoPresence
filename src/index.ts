@@ -6,6 +6,8 @@ import { handleClockOut } from "./selenium/clock-out";
 import { asyncDelay } from "./utils/delay";
 import { initUserTable } from "./db";
 import "./server";
+import { sendNotification } from "./slack";
+import { DateTime } from "luxon";
 
 initUserTable();
 
@@ -13,14 +15,23 @@ const clockIn = async (delayMs) => {
   try {
     await asyncDelay(delayMs);
     const driver = await loadKeka();
-    await asyncDelay(5000);
     handleClockIn(driver);
+
+    const successMessage = `✅ Clocked in 🕘 Successfully at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    await sendNotification(successMessage);
+    console.log("====================================");
+    console.log(successMessage);
+    console.log("====================================");
   } catch (error) {
+    const errorMessage = `❌ Clock-In 🕘 failed at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    await sendNotification(errorMessage, error);
     console.log("====================================");
+    console.log(errorMessage);
     console.log(error);
-    console.log("====================================");
-    console.log("====================================");
-    console.log("Clock-In failed");
     console.log("====================================");
   }
 };
@@ -29,30 +40,46 @@ const clockOut = async (delayMs) => {
   try {
     await asyncDelay(delayMs);
     const driver = await loadKeka();
-    await asyncDelay(5000);
     handleClockOut(driver);
+
+    const successMessage = `✅ Clocked out 🕕 Successfully at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    await sendNotification(successMessage);
+    console.log("====================================");
+    console.log(successMessage);
+    console.log("====================================");
   } catch (error) {
+    const errorMessage = `❌ Clock-Out 🕕 failed at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    await sendNotification(errorMessage, error);
     console.log("====================================");
+    console.log(errorMessage);
     console.log(error);
-    console.log("====================================");
-    console.log("====================================");
-    console.log("Clock-Out failed");
     console.log("====================================");
   }
 };
 
 const run = async () => {
-  const driver = await loadKeka();
   cron.schedule("50 9 * * 1-5", () => {
+    const message = `🕘 Clock-in started at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    sendNotification(message);
     console.log("====================================");
-    console.log("CRON RUNNING - IN");
+    console.log(message);
     console.log("====================================");
     const delayMs = Math.floor(Math.random() * 1200000);
     clockIn(delayMs);
   });
   cron.schedule("10 19 * * 1-5", () => {
+    const message = `🕕 Clock-out started at: ${DateTime.now().toLocaleString(
+      DateTime.DATETIME_MED
+    )}`;
+    sendNotification(message);
     console.log("====================================");
-    console.log("CRON RUNNING - OUT");
+    console.log(message);
     console.log("====================================");
     const delayMs = Math.floor(Math.random() * 1200000);
     clockOut(delayMs);

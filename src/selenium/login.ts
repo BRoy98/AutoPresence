@@ -46,7 +46,7 @@ export const loginToKeka = async (driver: WebDriver) => {
   const captchaText = await readCaptcha("captcha.png");
 
   console.log("====================================");
-  console.log("Captcha", captchaText);
+  console.log("Captcha:", captchaText);
   console.log("====================================");
 
   await captchaInput.sendKeys(captchaText);
@@ -98,7 +98,7 @@ const fillOTP = async (driver: WebDriver) => {
 
   const otp = await readOTP();
   console.log("====================================");
-  console.log("OTP", otp);
+  console.log("OTP: ", otp);
   console.log("====================================");
 
   await otpInput.sendKeys(otp as string);

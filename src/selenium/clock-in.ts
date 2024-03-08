@@ -26,7 +26,4 @@ export const handleClockIn = async (driver: WebDriver) => {
     until.elementLocated(By.xpath('//button[text()="Web Clock-out"]')),
     5000
   );
-  console.log("====================================");
-  console.log("Clocked in Successfully");
-  console.log("====================================");
 };
