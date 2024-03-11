@@ -16,7 +16,7 @@ router.get("/google/callback", async (req, res) => {
   try {
     const { oauth2Client, setCredentials } = await getOAuthClient();
 
-    const { tokens } = await oauth2Client.getToken(code);
+    const { tokens } = await oauth2Client.getToken(code as string);
     setCredentials(tokens);
 
     // Use access_token or id_token to fetch user profile

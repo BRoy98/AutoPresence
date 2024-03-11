@@ -1,0 +1,9 @@
+www.gmailnotifier.xyz {
+	redir https://gmailnotifier.xyz{uri}
+}
+
+gmailnotifier.xyz {
+  handle {
+    reverse_proxy localhost:3000
+  }
+}

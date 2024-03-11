@@ -18,7 +18,7 @@ export const loadKeka = async (): Promise<WebDriver> => {
     "profile.default_content_setting_values.geolocation": 2,
   });
   options.windowSize(screen);
-  options.addArguments("--headless");
+  // options.addArguments("--headless");
 
   driver = new Builder().forBrowser("chrome").setChromeOptions(options).build();
   await driver.get("https://app.keka.com/Account/KekaLogin");
@@ -26,14 +26,19 @@ export const loadKeka = async (): Promise<WebDriver> => {
   try {
     await loginToKeka(driver);
     await asyncDelay(5000);
-    retryCount = 0;
+
+    if (retryCount > 3) retryCount = 0;
     return driver;
   } catch (error) {
     if (error instanceof Error && error.message === "captcha-failed") {
       if (retryCount > 3) {
         const error =
           "Captcha failed more than 3 times. Stopped retry process.";
-        await sendNotification(error);
+        await sendNotification({
+          type: "failure",
+          message: error,
+          data: error,
+        });
         throw new Error(error);
       }
       retryCount += 1;

@@ -7,6 +7,14 @@ app.set("trust proxy", 1);
 
 app.use("/auth", authRoutes);
 
+app.use("/hook/slack", (req: express.Request, res) => {
+  console.log("====================================");
+  console.log("body", req.body);
+  console.log("body", req.header);
+  console.log("====================================");
+  return res.send("OK");
+});
+
 app.use("/", (req, res) => {
   res.send("Hey people 👋");
 });
