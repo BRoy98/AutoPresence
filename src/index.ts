@@ -9,13 +9,15 @@ import { sendNotification } from "./slack";
 import { DateTime } from "luxon";
 import { millisToMinutesAndSeconds } from "./utils/ms-to-min";
 import "./server";
+import { WebDriver } from "selenium-webdriver";
 
 initUserTable();
 
 const clockIn = async (delayMs) => {
+  let driver: WebDriver;
   try {
     await asyncDelay(delayMs);
-    const driver = await loadKeka();
+    driver = await loadKeka();
     await handleClockIn(driver);
 
     const successMessage = `✅ Clocked in 🕘 Successfully at: ${DateTime.now().toLocaleString(
@@ -29,6 +31,7 @@ const clockIn = async (delayMs) => {
     console.log(successMessage);
     console.log("====================================");
   } catch (error) {
+    driver.close();
     const errorMessage = `❌ Clock-In 🕘 failed at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
@@ -45,9 +48,10 @@ const clockIn = async (delayMs) => {
 };
 
 const clockOut = async (delayMs) => {
+  let driver: WebDriver;
   try {
     await asyncDelay(delayMs);
-    const driver = await loadKeka();
+    driver = await loadKeka();
     await handleClockOut(driver);
 
     const successMessage = `✅ Clocked out 🕕 Successfully at: ${DateTime.now().toLocaleString(
@@ -61,6 +65,7 @@ const clockOut = async (delayMs) => {
     console.log(successMessage);
     console.log("====================================");
   } catch (error) {
+    driver.close();
     const errorMessage = `❌ Clock-Out 🕕 failed at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
@@ -77,7 +82,7 @@ const clockOut = async (delayMs) => {
 };
 
 const run = async () => {
-  cron.schedule("19 10 * * 1-5", () => {
+  cron.schedule("30 09 * * 1-5", () => {
     const delayMs = Math.floor(Math.random() * 1200000);
     const message = `🕘 Clock-in started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
@@ -92,7 +97,7 @@ const run = async () => {
     console.log("====================================");
     clockIn(0);
   });
-  cron.schedule("15 19 * * 1-5", () => {
+  cron.schedule("14 21 * * 1-5", () => {
     const delayMs = Math.floor(Math.random() * 1200000);
     const message = `🕕 Clock-out started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED

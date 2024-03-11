@@ -130,3 +130,4 @@ dist
 .pnp.*
 credentials.json
 gmail-notifier.prod.sqlite
+captcha.png
