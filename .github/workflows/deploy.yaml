@@ -42,3 +42,31 @@ jobs:
 
       - name: Build service
         run: yarn build
+
+      - name: RSync deployments
+        uses: burnett01/rsync-deployments@7.0.0
+        with:
+          switches: -avzr --delete
+          path: src/
+          remote_path: /var/www/html/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.USER_NAME }}
+          remote_key: ${{ secrets.PRIVATE_KEY }}
+
+      # - name: Deploy Changes
+      #   run: |
+      #     mkdir ~/.ssh
+      #     touch ~/.ssh/known_hosts
+
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key
+      #     chmod 600 ~/.ssh/private_key
+      #     sudo chown -v $USER ~/.ssh/known_hosts
+      #     ssh-keygen -R ${{ secrets.SSH_HOST }}
+
+      #     ls -al ~/.ssh/
+      #     # ssh-keygen -H -t rsa ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      #     scp -i ~/.ssh/private_key -r ./dist ${{ secrets.USER_NAME }}@${{ secrets.SSH_HOST }}:/home/ec2-user/auto-presence
+      #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/private_key ${{ secrets.USER_NAME }}@${{ secrets.SSH_HOST}} '
+
+      #       ls
+      #       '

@@ -1,4 +1,5 @@
 import { By, WebDriver, until } from "selenium-webdriver";
+import { asyncDelay } from "../utils/delay";
 
 export const handleClockIn = async (driver: WebDriver) => {
   await driver.get("https://expian.keka.com/#/me/attendance/logs");
@@ -7,9 +8,14 @@ export const handleClockIn = async (driver: WebDriver) => {
     5000
   );
 
+  asyncDelay(2000);
+
   const clockInButton = driver.findElement(
     By.xpath('//a[text()="Web Clock-In"]')
   );
+  console.log("====================================");
+  console.log("clockInButton", clockInButton);
+  console.log("====================================");
   await clockInButton.click();
 
   const closeLocationPopupIdentifier = By.xpath(

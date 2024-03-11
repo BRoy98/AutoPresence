@@ -12,6 +12,7 @@ import "./server";
 import { WebDriver } from "selenium-webdriver";
 
 initUserTable();
+const ONE_HOUR_MS = 3600000;
 
 const clockIn = async (delayMs) => {
   let driver: WebDriver;
@@ -20,7 +21,7 @@ const clockIn = async (delayMs) => {
     driver = await loadKeka();
     await handleClockIn(driver);
 
-    const successMessage = `✅ Clocked in 🕘 Successfully at: ${DateTime.now().toLocaleString(
+    const successMessage = `✅ Clock-In 🕘 Successful at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
     await sendNotification({
@@ -31,7 +32,6 @@ const clockIn = async (delayMs) => {
     console.log(successMessage);
     console.log("====================================");
   } catch (error) {
-    driver.close();
     const errorMessage = `❌ Clock-In 🕘 failed at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
@@ -44,6 +44,7 @@ const clockIn = async (delayMs) => {
     console.log(errorMessage);
     console.log(error);
     console.log("====================================");
+    driver?.close();
   }
 };
 
@@ -65,7 +66,6 @@ const clockOut = async (delayMs) => {
     console.log(successMessage);
     console.log("====================================");
   } catch (error) {
-    driver.close();
     const errorMessage = `❌ Clock-Out 🕕 failed at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
@@ -78,12 +78,13 @@ const clockOut = async (delayMs) => {
     console.log(errorMessage);
     console.log(error);
     console.log("====================================");
+    driver?.close();
   }
 };
 
 const run = async () => {
   cron.schedule("30 09 * * 1-5", () => {
-    const delayMs = Math.floor(Math.random() * 1200000);
+    const delayMs = Math.floor(Math.random() * ONE_HOUR_MS);
     const message = `🕘 Clock-in started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
@@ -97,8 +98,8 @@ const run = async () => {
     console.log("====================================");
     clockIn(0);
   });
-  cron.schedule("14 21 * * 1-5", () => {
-    const delayMs = Math.floor(Math.random() * 1200000);
+  cron.schedule("30 19 * * 1-5", () => {
+    const delayMs = Math.floor(Math.random() * ONE_HOUR_MS);
     const message = `🕕 Clock-out started at: ${DateTime.now().toLocaleString(
       DateTime.DATETIME_MED
     )}`;
