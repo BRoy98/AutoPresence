@@ -96,7 +96,7 @@ const run = async () => {
     console.log("====================================");
     console.log(message);
     console.log("====================================");
-    clockIn(0);
+    clockIn(delayMs);
   });
   cron.schedule("30 19 * * 1-5", () => {
     const delayMs = Math.floor(Math.random() * ONE_HOUR_MS);
@@ -111,7 +111,7 @@ const run = async () => {
     console.log("====================================");
     console.log(message);
     console.log("====================================");
-    clockOut(5000);
+    clockOut(delayMs);
   });
 };
 

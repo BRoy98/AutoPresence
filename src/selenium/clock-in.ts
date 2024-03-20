@@ -13,9 +13,6 @@ export const handleClockIn = async (driver: WebDriver) => {
   const clockInButton = driver.findElement(
     By.xpath('//a[text()="Web Clock-In"]')
   );
-  console.log("====================================");
-  console.log("clockInButton", clockInButton);
-  console.log("====================================");
   await clockInButton.click();
 
   const closeLocationPopupIdentifier = By.xpath(
